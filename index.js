@@ -12,8 +12,6 @@ app.get('/user', (req, res) => {
   res.send(process.env.REDIRECT_URI);
 } );
 
-app.listen(port, () => console.log(`Example app listening at http://localhost:${port}`));
-
 app.get('/login', function(req, res) {
   var scopes = 'user-read-private user-read-email';
   res.redirect('https://accounts.spotify.com/authorize' +
@@ -22,3 +20,12 @@ app.get('/login', function(req, res) {
     (scopes ? '&scope=' + encodeURIComponent(scopes) : '') +
     '&redirect_uri=' + encodeURIComponent(process.env.REDIRECT_URI));
   });
+
+app.get('/playlists', function(req, res) {
+  playlists = fetch('https://api.spotify.com/v1/users/thatfeoguy/playlists')
+  .then( res => res.json() )
+  .then( data => data )
+  res.send(playlists);
+})
+
+app.listen(port, () => console.log(`Example app listening at http://localhost:${port}`));
