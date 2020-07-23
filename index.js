@@ -13,3 +13,12 @@ app.get('/user', (req, res) => {
 } );
 
 app.listen(port, () => console.log(`Example app listening at http://localhost:${port}`));
+
+app.get('/login', function(req, res) {
+  var scopes = 'user-read-private user-read-email';
+  res.redirect('https://accounts.spotify.com/authorize' +
+    '?response_type=code' +
+    '&client_id=' + process.env.SPOTIFY_ID +
+    (scopes ? '&scope=' + encodeURIComponent(scopes) : '') +
+    '&redirect_uri=' + encodeURIComponent(process.env.REDIRECT_URI));
+  });
