@@ -75,8 +75,23 @@ app.get('/callback', function(req, res) {
     }
   )
   .then( res => res.json() )
-  .then( data => console.log("Success: ", data) )
-  .catch( err => console.log("Error: ", err) );
+  .then( data => {
+    console.log("Data: ", data)
+    // return error message
+    if (data.error) res.end(data.error_description)
+
+    const { access_token, token_type, expires_in, refresh_token, scope } = data;
+    const tokenAuthorizationHeader = token_type + ' ' + access_token;
+    console.log('Authorization Header: ', tokenAuthorizationHeader);
+    return fetch('https://api.spotify.com/v1/me', {
+      'method': 'GET',
+      'headers': {
+        'Authorization': tokenAuthorizationHeader
+      }
+    })
+    .then( res => res.json() )
+    .then( data => console.log(data) )
+  } );
 });
 
 
