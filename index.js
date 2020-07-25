@@ -51,8 +51,8 @@ app.get('/callback', function(req, res) {
   const state = req.query.state;
   const err = decodeURIComponent(req.query.error); // failed parameter
   const code = decodeURIComponent(req.query.code); // success parameter
-  const buffer = new Buffer(process.env.SPOTIFY_ID + ':' + process.env.SPOTIFY_SECRET);
-  const encodedAuthorization = buffer.toString('base64');
+  const encodedAuthorization = new Buffer.from(process.env.SPOTIFY_ID + ':' + process.env.SPOTIFY_SECRET).toString('base64');
+  // const  = buffer.toString('base64');
   console.log('Authorization code: ', code);
   console.log('Encoded authorization: ', encodedAuthorization);
 
@@ -62,18 +62,18 @@ app.get('/callback', function(req, res) {
   // show error message if any
   if (err) res.end(err);
 
-  fetch('https://accounts.spotify.com/api/token', {
-    'method': 'POST',
-    'headers': {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'Authorization': `Basic `
-    },
-    body: JSON.stringify({
-      grant_type: 'authorization_code',
-      code,
-      redirect: process.env.REDIRECT_URI
-    })
-  })
+  fetch('https://accounts.spotify.com/api/token' + 
+    '?grant_type=authorization_code' +
+    '&code=' + code +
+    '&redirect_uri=' + process.env.REDIRECT_URI,
+    {
+      'method': 'POST',
+      'headers': {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': `Basic ${encodedAuthorization}`
+      }
+    }
+  )
   .then( res => res.json() )
   .then( data => console.log("Success: ", data) )
   .catch( err => console.log("Error: ", err) );
