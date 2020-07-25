@@ -49,14 +49,34 @@ app.get('/authorize', function(req, res) {
 
 app.get('/callback', function(req, res) {
   const state = req.query.state;
-  const code = req.query.code; // success parameter
-  const err = req.query.error; // failed parameter
+  const err = decodeURIComponent(req.query.error); // failed parameter
+  const code = decodeURIComponent(req.query.code); // success parameter
+  const buffer = new Buffer(process.env.SPOTIFY_ID + ':' + process.env.SPOTIFY_SECRET);
+  const encodedAuthorization = buffer.toString('base64');
+  console.log('Authorization code: ', code);
+  console.log('Encoded authorization: ', encodedAuthorization);
 
   // deny any responses with altered state parameter
   if (state !== req.session.state) res.end('ACCESS DENIED!!!'); //? secure way to handle code parameter
 
+  // show error message if any
+  if (err) res.end(err);
 
-  console.log(state);
+  fetch('https://accounts.spotify.com/api/token', {
+    'method': 'POST',
+    'headers': {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Authorization': `Basic `
+    },
+    body: JSON.stringify({
+      grant_type: 'authorization_code',
+      code,
+      redirect: process.env.REDIRECT_URI
+    })
+  })
+  .then( res => res.json() )
+  .then( data => console.log("Success: ", data) )
+  .catch( err => console.log("Error: ", err) );
 });
 
 
