@@ -25,18 +25,19 @@ app.get('/', (req, res) => {
   // set state
   req.session.state = id;
 
-  console.log('New session state set: ', id);
+  console.log('New session state set: ', id); //! DELETE IN PRODUCTION
   res.send('Hello World!')
 });
 
+//? useless route?
 app.get('/user', (req, res) => {
-  console.log(process.env.REDIRECT_URI);
+  console.log(process.env.REDIRECT_URI); //! DELETE IN PRODUCTION
   res.send(process.env.REDIRECT_URI);
 } );
 
 app.get('/authorize', function(req, res) {
   const scopes = 'user-read-private user-read-email';
-  console.log('Sending state: ', req.session.state);
+  console.log('Sending state: ', req.session.state); //! DELETE IN PRODUCTION
   res.redirect('https://accounts.spotify.com/authorize' +
     '?response_type=code' +
     '&client_id=' + process.env.SPOTIFY_ID +
@@ -48,6 +49,13 @@ app.get('/authorize', function(req, res) {
 
 app.get('/callback', function(req, res) {
   const state = req.query.state;
+  const code = req.query.code; // success parameter
+  const err = req.query.error; // failed parameter
+
+  // deny any responses with altered state parameter
+  if (state !== req.session.state) res.end('ACCESS DENIED!!!'); //? secure way to handle code parameter
+
+
   console.log(state);
 });
 
