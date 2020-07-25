@@ -1,23 +1,31 @@
 require('dotenv').config();
-// const cookieSession = require('cookie-session');
-// const { v4: uuid } = require('uuid');
-// ! check module syntax
-// import { v4 as uuid } from 'uuid';
+const cookieSession = require('cookie-session');
+const { v4: uuid } = require('uuid');
 const fetch = require('node-fetch');
 
 const express = require('express');
 const app = express();
 const port = 3000;
 
+app.use(cookieSession({
+  name: 'session',
+  keys: [process.env.KEY_1, process.env.KEY_2],
+  cookie: {
+    // secure: true,
+    httpOnly: true,
+  }
+}));
+app.disable('x-powered-by');
 
 app.get('/', (req, res) => {
 
   // refresh uuid
-  // const id = uuid();
+  const id = uuid();
 
   // set state
-  // res.cookie('state', id, { httpOnly: true});
-  // console.log('New session state set: ', id);
+  res.cookie('state', id);
+  console.log('New session state set: ', id);
+
   res.send('Hello World!')
 });
 
@@ -34,7 +42,7 @@ app.get('/authorize', function(req, res) {
     '&client_id=' + process.env.SPOTIFY_ID +
     (scopes ? '&scope=' + encodeURIComponent(scopes) : '') +
     // grab state from session
-    // '&state=' + req.session.state +
+    '&state=' + req.session.state +
     '&redirect_uri=' + encodeURIComponent(process.env.REDIRECT_URI));
 });
 
