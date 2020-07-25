@@ -23,9 +23,9 @@ app.get('/', (req, res) => {
   const id = uuid();
 
   // set state
-  res.cookie('state', id);
-  console.log('New session state set: ', id);
+  req.session.state = id;
 
+  console.log('New session state set: ', id);
   res.send('Hello World!')
 });
 
@@ -36,7 +36,7 @@ app.get('/user', (req, res) => {
 
 app.get('/authorize', function(req, res) {
   const scopes = 'user-read-private user-read-email';
-
+  console.log('Sending state: ', req.session.state);
   res.redirect('https://accounts.spotify.com/authorize' +
     '?response_type=code' +
     '&client_id=' + process.env.SPOTIFY_ID +
