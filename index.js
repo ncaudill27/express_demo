@@ -1,12 +1,25 @@
 require('dotenv').config();
+// const cookieSession = require('cookie-session');
+// const { v4: uuid } = require('uuid');
+// ! check module syntax
+// import { v4 as uuid } from 'uuid';
 const fetch = require('node-fetch');
 
 const express = require('express');
 const app = express();
 const port = 3000;
 
-const helloWorld = (req, res) => res.send('Hello World!');
-app.get('/', helloWorld);
+
+app.get('/', (req, res) => {
+
+  // refresh uuid
+  // const id = uuid();
+
+  // set state
+  // res.cookie('state', id, { httpOnly: true});
+  // console.log('New session state set: ', id);
+  res.send('Hello World!')
+});
 
 app.get('/user', (req, res) => {
   console.log(process.env.REDIRECT_URI);
@@ -14,13 +27,14 @@ app.get('/user', (req, res) => {
 } );
 
 app.get('/authorize', function(req, res) {
-  var scopes = 'user-read-private user-read-email';
-  // cookie needs to be set up
-  // req.session.state
+  const scopes = 'user-read-private user-read-email';
+
   res.redirect('https://accounts.spotify.com/authorize' +
     '?response_type=code' +
     '&client_id=' + process.env.SPOTIFY_ID +
     (scopes ? '&scope=' + encodeURIComponent(scopes) : '') +
+    // grab state from session
+    // '&state=' + req.session.state +
     '&redirect_uri=' + encodeURIComponent(process.env.REDIRECT_URI));
 });
 
