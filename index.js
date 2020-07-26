@@ -66,7 +66,8 @@ app.get('/callback', function(req, res) {
   // show error message if any
   if (err) res.end(err);
 
-  authorizeUser(req, res);
+  authorizeUser(req, res)
+  .then( data => console.log(data) )
   
 
 });
@@ -79,7 +80,7 @@ function authorizeUser(req, res) {
   console.log('Authorization code: ', code); //! DELETE IN PRODUCTION
   console.log('Encoded authorization: ', encodedAuthorization); //! DELETE IN PRODUCTION
 
-  fetch('https://accounts.spotify.com/api/token' + 
+  return fetch('https://accounts.spotify.com/api/token' + 
     '?grant_type=authorization_code' +
     '&code=' + code +
     '&redirect_uri=' + process.env.REDIRECT_URI,
@@ -112,9 +113,7 @@ function authorizeUser(req, res) {
     })
     .then( res => res.json() )
     .then( data => {
-      console.log(data) //! DELETE IN PRODUCTION
-      req.session.username = data.display_name;
-      return { username: data.display_name, refreshToken: refresh_token }
+      return { userData: {...data}, refreshToken: refresh_token }
     } )
   } );
 }
