@@ -40,11 +40,11 @@ app.get('/', (req, res) => {
 });
 
 //? useless route?
-app.get('/user', (req, res) => {
-  console.log(process.env.REDIRECT_URI); //! DELETE IN PRODUCTION
-  res.send(process.env.REDIRECT_URI);
-} );
-
+app.get('/:user', (req, res) => {
+  
+  console.log(refreshTokens[req.params.user]);
+  res.send(`Hello ${req.params.user}`);
+});
 
 app.get('/authorize', function(req, res) {
   const scopes = 'user-read-private user-modify-playback-state playlist-read-private';
@@ -70,9 +70,15 @@ app.get('/callback', function(req, res) {
   if (err) res.end(err);
 
   authorizeUser(req, res)
-  .then( data => console.log(data) )
-  
+  .then( ({ userData, refreshToken, accessToken, accessExpiration }) => {
+    refreshTokens[userData.id] = {
+      refreshToken,
+      accessToken,
+      accessExpiration
+    };
 
+    res.redirect(`../${userData.id}`);
+  });
 });
 
 app.listen(port, () => console.log(`Example app listening at http://localhost:${port}`));
@@ -116,7 +122,7 @@ function authorizeUser(req, res) {
     })
     .then( res => res.json() )
     .then( data => {
-      return { userData: data, refreshToken: refresh_token }
+      return { userData: data, refreshToken: refresh_token, accessToken: access_token, accessExpiration: expires_in }
     } )
   } );
 }
@@ -139,5 +145,5 @@ function refreshToken(req, res) {
     }
   )
   .then( res => res.json() )
-  .then( data => data )
+  .then( data => data );
 }
