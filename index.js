@@ -39,11 +39,10 @@ app.get('/', (req, res) => {
   else res.send('Hello World!');
 });
 
-//? useless route?
 app.get('/:user', (req, res) => {
   
   console.log(refreshTokens[req.params.user]);
-  res.send(`Hello ${req.params.user}`);
+  res.send(`${req.params.user} logged in`);
 });
 
 app.get('/authorize', function(req, res) {
@@ -77,8 +76,9 @@ app.get('/callback', function(req, res) {
       accessExpiration
     };
 
-    res.redirect(`../${userData.id}`);
-  });
+    res.redirect('http://localhost:3000/' + user.id);
+  })
+  .catch( err => res.end('/callback err: ', err) );
 });
 
 app.listen(port, () => console.log(`Example app listening at http://localhost:${port}`));
