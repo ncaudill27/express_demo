@@ -20,6 +20,9 @@ app.use(cookieSession({
 }));
 app.disable('x-powered-by');
 
+const encodedAuthorization = new Buffer.from(process.env.SPOTIFY_ID + ':' + process.env.SPOTIFY_SECRET).toString('base64');
+const refreshTokens = {};
+
 
 app.get('/', (req, res) => {
 
@@ -76,7 +79,7 @@ app.listen(port, () => console.log(`Example app listening at http://localhost:${
 
 function authorizeUser(req, res) {
   const code = req.query.code; // success parameter
-  const encodedAuthorization = new Buffer.from(process.env.SPOTIFY_ID + ':' + process.env.SPOTIFY_SECRET).toString('base64');
+
   console.log('Authorization code: ', code); //! DELETE IN PRODUCTION
   console.log('Encoded authorization: ', encodedAuthorization); //! DELETE IN PRODUCTION
 
@@ -113,7 +116,28 @@ function authorizeUser(req, res) {
     })
     .then( res => res.json() )
     .then( data => {
-      return { userData: {...data}, refreshToken: refresh_token }
+      return { userData: data, refreshToken: refresh_token }
     } )
   } );
+}
+
+function refreshToken(req, res) {
+
+  //! temp implementation 
+  const refreshToken = localStorage.getItem('refreshToken');
+  // desired implementation
+  // const refeshToken = refreshTokens[username];
+
+  return fetch('https://accounts.spotify.com/api/token' + 
+    '?grant_type=refresh_token' + refreshToken,
+    {
+      'method': 'POST',
+      'headers': {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': tokenAuthorizationHeader
+      }
+    }
+  )
+  .then( res => res.json() )
+  .then( data => data )
 }
